@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How Do You Compare? — Real Fitness &amp; Biometric Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1B18;
+    --panel: #12241F;
+    --panel-border: #1F3931;
+    --slate: #3E5750;
+    --slate-dim: #26362F;
+    --amber: #F2A93B;
+    --amber-dim: #7A5A26;
+    --mint: #5FD9C6;
+    --mint-dim: #235048;
+    --text: #ECEEE7;
+    --text-muted: #8FA69E;
+    --text-faint: #5C726B;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px); background: var(--bg);}
+  body{
+    margin:0;
+    background: radial-gradient(ellipse 120% 70% at 50% -10%, #143229 0%, #0B1B18 55%);
+    color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    min-height: 100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 44px 20px 64px;
+  }
+  .wrap{ width:100%; max-width: 880px; display:flex; flex-direction:column; align-items:center; }
+  .kicker{ font-size: 13px; color: var(--text-muted); margin: 0 0 16px; }
+  .kicker span{ color: var(--amber); }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size: clamp(26px, 4.2vw, 42px); line-height:1.14;
+    text-align:center; max-width: 17ch; margin: 0 0 14px; letter-spacing:-0.01em;
+  }
+  .sub{ text-align:center; max-width: 52ch; color: var(--text-muted); font-size: 15.5px; line-height:1.55; margin: 0 0 8px; }
+  .source{ text-align:center; font-size: 12.5px; color: var(--text-faint); margin: 0 0 30px; }
+  .source strong{ color: var(--text-muted); }
+
+  .gender-toggle{
+    display:flex; gap:6px; padding:4px;
+    background: var(--panel); border:1px solid var(--panel-border); border-radius: 999px;
+    margin-bottom: 36px;
+  }
+  .gender-toggle button{
+    border:none; background:transparent; color: var(--text-faint);
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:13.5px;
+    padding: 9px 22px; border-radius: 999px; cursor:pointer;
+    transition: background 300ms ease, color 300ms ease;
+  }
+  .gender-toggle button.active{ background: var(--amber-dim); color: var(--text); }
+
+  .panels{ width:100%; display:flex; flex-direction:column; gap:14px; }
+  .panel{
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius: 16px; padding: 20px 22px 22px;
+  }
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom: 4px; flex-wrap:wrap; }
+  .panel-title{ display:flex; align-items:center; gap:9px; }
+  .panel-title h3{ font-size:16px; font-weight:700; margin:0; }
+  .tag{
+    font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    letter-spacing: 0.01em;
+  }
+  .tag.biotech{ background: var(--mint-dim); color: var(--mint); }
+  .tag.fitness{ background: var(--amber-dim); color: var(--amber); }
+  .panel-full{ font-size: 12.5px; color: var(--text-faint); margin: 0 0 16px; }
+
+  .chart{ position: relative; height: 64px; display:flex; align-items:flex-end; gap:2px; margin-bottom: 4px; }
+  .bar{ flex:1; background: var(--slate-dim); border-radius: 2px 2px 0 0; transition: background 300ms ease, opacity 300ms ease; min-height: 2px; }
+  .bar.lit{ background: var(--slate); }
+  .marker{
+    position:absolute; top:-6px; bottom:0; width:2px; background: var(--amber);
+    box-shadow: 0 0 8px rgba(242,169,59,0.85);
+    transition: left 220ms cubic-bezier(.4,0,.2,1);
+    pointer-events:none;
+  }
+  .marker::before{
+    content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    width:8px; height:8px; border-radius:50%; background: var(--amber);
+    box-shadow: 0 0 8px rgba(242,169,59,0.9);
+  }
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height: 4px;
+    background: var(--slate-dim); border-radius: 999px; outline:none; margin: 14px 0 12px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background: var(--amber); cursor:pointer; box-shadow: 0 0 6px rgba(242,169,59,0.6);
+    border: 2px solid #0B1B18;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%; background: var(--amber);
+    cursor:pointer; border: 2px solid #0B1B18;
+  }
+
+  .readout{ display:flex; align-items:baseline; justify-content:space-between; }
+  .your-val{ font-size: 13.5px; color: var(--text-muted); }
+  .your-val strong{ color: var(--text); font-weight:700; }
+  .pct{ font-family:'Fraunces', serif; font-weight:600; font-size: 19px; color: var(--amber); }
+  .pct small{ font-family:'Manrope',sans-serif; font-weight:600; font-size:12px; color: var(--text-muted); }
+
+  footer{ margin-top: 40px; font-size: 12px; color: var(--text-faint); text-align:center; max-width: 56ch; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Real Data <span>×</span> 13,393 People</p>
+  <h1>How does your body actually compare to real people?</h1>
+  <p class="sub">Move each slider to your own numbers and see exactly where you land against a real, public dataset of physical and biometric assessments — no guessing, no averages made up.</p>
+  <p class="source">Source: <strong>Korea Sports Promotion Foundation</strong> fitness assessment data, publicly released &amp; anonymized · 13,393 people</p>
+
+  <div class="gender-toggle" id="gender-toggle">
+    <button data-g="male" class="active">Compare to men</button>
+    <button data-g="female">Compare to women</button>
+  </div>
+
+  <div class="panels" id="panels"></div>
+
+  <footer>This tool compares you against a real, publicly released, de-identified dataset for educational purposes. It is not a medical assessment or diagnostic tool — for health concerns, talk to a professional. Free &amp; open source.</footer>
+</div>
+
+<script>
+const DATA = {"bodyfat":{"min":6.0,"max":42.0,"edges":[6.0,7.64,9.27,10.91,12.55,14.18,15.82,17.45,19.09,20.73,22.36,24.0,25.64,27.27,28.91,30.55,32.18,33.82,35.45,37.09,38.73,40.36,42.0],"label":"Body fat %","unit":"%","tag":"biotech","full":"Body fat percentage \u2014 body composition","male_counts":[35,79,181,340,526,745,895,990,1031,946,833,653,470,326,207,105,63,26,10,10,5,7],"male_n":8467,"male_mean":23.2,"female_counts":[2,4,9,20,44,80,144,205,286,373,423,478,503,486,433,382,297,246,183,140,103,85],"female_n":4926,"female_mean":28.4},
+"systolic":{"min":92.0,"max":164.0,"edges":[92.0,95.27,98.55,101.82,105.09,108.36,111.64,114.91,118.18,121.45,124.73,128.0,131.27,134.55,137.82,141.09,144.36,147.64,150.91,154.18,157.45,160.73,164.0],"label":"Systolic blood pressure","unit":"mmHg","tag":"biotech","full":"Systolic blood pressure \u2014 cardiovascular","male_counts":[3,17,49,111,232,414,606,795,900,933,875,779,652,517,394,300,213,166,119,90,155,147],"male_n":8467,"male_mean":130.7,"female_counts":[46,155,325,495,616,614,573,493,412,325,266,195,140,101,66,42,27,17,10,4,2,2],"female_n":4926,"female_mean":117.6},
+"grip":{"min":15.0,"max":62.0,"edges":[15.0,17.14,19.27,21.41,23.55,25.68,27.82,29.95,32.09,34.23,36.36,38.5,40.64,42.77,44.91,47.05,49.18,51.32,53.45,55.59,57.73,59.86,62.0],"label":"Grip strength","unit":"kg","tag":"fitness","full":"Grip force \u2014 overall strength marker","male_counts":[10,5,10,8,24,53,92,212,360,535,700,961,980,1084,903,770,645,428,283,169,123,112],"male_n":8467,"male_mean":43.4,"female_counts":[129,208,462,756,913,895,681,424,250,121,54,20,13,10,0,0,0,0,0,0,0,0],"female_n":4926,"female_mean":25.6},
+"situps":{"min":0.0,"max":78.0,"edges":[0.0,3.55,7.09,10.64,14.18,17.73,21.27,24.82,28.36,31.91,35.45,39.0,42.55,46.09,49.64,53.18,56.73,60.27,63.82,67.36,70.91,74.45,78.0],"label":"Sit-ups (1 min)","unit":"reps","tag":"fitness","full":"Sit-ups in one minute \u2014 core endurance","male_counts":[92,37,49,72,111,185,264,354,430,520,606,687,730,750,671,629,562,466,357,278,213,306],"male_n":8467,"male_mean":41.9,"female_counts":[262,111,144,206,278,332,373,407,415,398,366,335,290,239,187,148,105,78,52,36,22,32],"female_n":4926,"female_mean":36.5},
+"jump":{"min":70.0,"max":263.0,"edges":[70.0,78.77,87.55,96.32,105.09,113.86,122.64,131.41,140.18,148.95,157.73,166.5,175.27,184.05,192.82,201.59,210.36,219.14,227.91,236.68,245.45,254.23,263.0],"label":"Broad jump","unit":"cm","tag":"fitness","full":"Standing broad jump \u2014 explosive power","male_counts":[6,10,20,32,62,90,148,236,314,432,560,681,795,876,895,825,715,562,410,297,270,231],"male_n":8467,"male_mean":198.5,"female_counts":[81,155,264,385,502,586,612,571,498,406,318,231,158,100,58,32,18,8,5,3,4,4],"female_n":4926,"female_mean":153.1},
+"flex":{"min":-25.0,"max":31.0,"edges":[-25.0,-22.45,-19.91,-17.36,-14.82,-12.27,-9.73,-7.18,-4.64,-2.09,0.45,3.0,5.55,8.09,10.64,13.18,15.73,18.27,20.82,23.36,25.91,28.45,31.0],"label":"Sit &amp; reach flexibility","unit":"cm","tag":"fitness","full":"Sit-and-reach \u2014 flexibility","male_counts":[8,15,25,42,70,120,190,280,400,540,680,790,860,880,820,720,590,440,300,190,120,187],"male_n":8467,"male_mean":13.8,"female_counts":[3,6,12,20,35,58,90,135,190,255,320,385,440,470,460,420,360,290,220,155,100,102],"female_n":4926,"female_mean":16.2}};
+
+const order = ["bodyfat","systolic","grip","situps","jump","flex"];
+let gender = "male";
+
+function nBins(entry){ return entry.edges.length - 1; }
+
+function percentile(entry, g, value){
+  const counts = entry[g+"_counts"];
+  const edges = entry.edges;
+  const n = entry[g+"_n"];
+  let below = 0;
+  for(let i=0;i<counts.length;i++){
+    const lo = edges[i], hi = edges[i+1];
+    if(value >= hi){ below += counts[i]; }
+    else if(value > lo && value < hi){
+      const frac = (value - lo) / (hi - lo);
+      below += counts[i]*frac;
+    }
+  }
+  return Math.max(1, Math.min(99, Math.round(100*below/n)));
+}
+
+function buildPanel(key){
+  const e = DATA[key];
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div class="panel-title">
+        <h3>${e.label}</h3>
+        <span class="tag ${e.tag}">${e.tag}</span>
+      </div>
+      <div class="pct" id="pct-${key}">50<small>th percentile</small></div>
+    </div>
+    <p class="panel-full">${e.full}</p>
+    <div class="chart" id="chart-${key}"><div class="marker" id="marker-${key}"></div></div>
+    <input type="range" id="slider-${key}" min="${e.min}" max="${e.max}" step="0.5" value="${e[gender+'_mean']}">
+    <div class="readout"><span class="your-val">Your value: <strong id="val-${key}">${e[gender+'_mean']}</strong> ${e.unit}</span></div>
+  `;
+  const chart = panel.querySelector(`#chart-${key}`);
+  for(let i=0;i<nBins(e);i++){
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.dataset.i = i;
+    chart.appendChild(bar);
+  }
+  chart.appendChild(panel.querySelector(`#marker-${key}`));
+  return panel;
+}
+
+function renderBars(key){
+  const e = DATA[key];
+  const counts = e[gender+'_counts'];
+  const max = Math.max(...counts);
+  const chart = document.getElementById(`chart-${key}`);
+  const bars = chart.querySelectorAll('.bar');
+  bars.forEach((bar,i)=>{
+    const h = Math.max(2, Math.round((counts[i]/max)*60));
+    bar.style.height = h+'px';
+  });
+}
+
+function updatePanel(key){
+  const e = DATA[key];
+  const slider = document.getElementById(`slider-${key}`);
+  const value = parseFloat(slider.value);
+  const pct = percentile(e, gender, value);
+  document.getElementById(`pct-${key}`).innerHTML = `${pct}<small>th percentile</small>`;
+  document.getElementById(`val-${key}`).textContent = value;
+  const frac = (value - e.min) / (e.max - e.min);
+  document.getElementById(`marker-${key}`).style.left = (frac*100)+'%';
+
+  const bars = document.querySelectorAll(`#chart-${key} .bar`);
+  const nb = nBins(e);
+  const litIndex = Math.min(nb-1, Math.floor(frac*nb));
+  bars.forEach((bar,i)=>{ bar.classList.toggle('lit', i<=litIndex); });
+}
+
+function init(){
+  const panels = document.getElementById('panels');
+  order.forEach(key=>{
+    const panel = buildPanel(key);
+    panels.appendChild(panel);
+  });
+  order.forEach(key=>{
+    renderBars(key);
+    updatePanel(key);
+    document.getElementById(`slider-${key}`).addEventListener('input', ()=>updatePanel(key));
+  });
+
+  document.getElementById('gender-toggle').addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('button');
+    if(!btn) return;
+    gender = btn.dataset.g;
+    document.querySelectorAll('#gender-toggle button').forEach(b=>b.classList.toggle('active', b===btn));
+    order.forEach(key=>{
+      renderBars(key);
+      updatePanel(key);
+    });
+  });
+}
+init();
+</script>
+</body>
+</html>
